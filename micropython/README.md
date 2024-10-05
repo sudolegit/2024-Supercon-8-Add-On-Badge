@@ -7,3 +7,5 @@
 3. Find the USB serial port.  You're up and running.
 
 
+## Peripherals and Drivers
+
