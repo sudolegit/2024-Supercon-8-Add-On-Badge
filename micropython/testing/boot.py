@@ -16,7 +16,29 @@ buttonA = Pin(8, Pin.IN, Pin.PULL_UP)
 buttonB = Pin(9, Pin.IN, Pin.PULL_UP)
 buttonC = Pin(28, Pin.IN, Pin.PULL_UP)
 
-## debug pin!
+## GPIOs
+gpio11 = Pin(7, Pin.OUT)
+gpio12 = Pin(6, Pin.OUT)
+
+gpio21 = Pin(5, Pin.OUT)
+gpio22 = Pin(4, Pin.OUT)
+
+gpio31 = Pin(3, Pin.OUT)
+gpio32 = Pin(2, Pin.OUT)
+
+gpio41 = Pin(22, Pin.OUT)
+gpio42 = Pin(21, Pin.OUT)
+
+gpio51 = Pin(20, Pin.OUT)
+gpio52 = Pin(19, Pin.OUT)
+
+gpio61 = Pin(18, Pin.OUT)
+gpio62 = Pin(17, Pin.OUT)
+
+GPIOs = [ [gpio11, gpio12], [gpio21, gpio22], [gpio31, gpio32], [gpio41, gpio42],  [gpio51, gpio52], [gpio61, gpio62] ]
+
+
+# debug pin!
 # p = Pin(7, Pin.OUT)
 # p.value(1)
 
@@ -86,8 +108,9 @@ if not petal_bus:
 
 
 ## waiting for wheel with a yellow light
-petal_bus.writeto_mem(PETAL_ADDRESS, 3, bytes([0x80]))
-petal_bus.writeto_mem(PETAL_ADDRESS, 2, bytes([0x80]))
+if petal_bus:
+    petal_bus.writeto_mem(PETAL_ADDRESS, 3, bytes([0x80]))
+    petal_bus.writeto_mem(PETAL_ADDRESS, 2, bytes([0x80]))
 
 ## touchwheel last, with a wait loop,  b/c it doesn't init until animation is over
 ## probably need to implement a timeout here?
@@ -118,10 +141,11 @@ def touchwheel_rgb(bus, r, g, b):
 
 
 ## goes green if wheel configured
-if touchwheel_bus:
+if touchwheel_bus and petal_bus:
     petal_bus.writeto_mem(PETAL_ADDRESS, 3, bytes([0x00]))
-petal_bus.writeto_mem(PETAL_ADDRESS, 2, bytes([0x80]))
-time.sleep_ms(200)
-petal_bus.writeto_mem(PETAL_ADDRESS, 2, bytes([0x00]))
+if petal_bus:
+    petal_bus.writeto_mem(PETAL_ADDRESS, 2, bytes([0x80]))
+    time.sleep_ms(200)
+    petal_bus.writeto_mem(PETAL_ADDRESS, 2, bytes([0x00]))
 
 

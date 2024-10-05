@@ -1,6 +1,7 @@
 from machine import I2C, Pin
 import time
 
+counter = 0
 while True:
 
     if HAS_SCREEN:
@@ -54,6 +55,17 @@ while True:
             else:
                 petal_bus.writeto_mem(0, i, bytes([0x00]))
 
+    ## pull GPIOs high to test
+    if counter % 10 == 0:
+        for i in range(6):
+            GPIOs[i][0].value(1)
+            GPIOs[i][1].value(1)
+    else:
+        for i in range(6):
+            GPIOs[i][0].value(0)
+            GPIOs[i][1].value(0)
+
+    counter = counter + 1
 
     
     time.sleep_ms(20)
