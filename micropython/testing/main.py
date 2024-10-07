@@ -2,6 +2,17 @@ from machine import I2C, Pin
 import time
 
 counter = 0
+
+## do a quick spiral to test
+if petal_bus:
+    for j in range(8):
+        which_leds = (1 << (j+1)) - 1 
+        for i in range(1,9):
+            print(which_leds)
+            petal_bus.writeto_mem(PETAL_ADDRESS, i, bytes([which_leds]))
+            time.sleep_ms(30)
+            petal_bus.writeto_mem(PETAL_ADDRESS, i, bytes([which_leds]))
+
 while True:
 
     if HAS_SCREEN:
