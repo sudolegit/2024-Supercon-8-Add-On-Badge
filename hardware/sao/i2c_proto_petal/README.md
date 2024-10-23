@@ -1,6 +1,6 @@
 # Prototyping I2C SAO Petal for Supercon 8.  
 
-Based on the cheap-as-chips CH32V003, this board has almost nothing on it, yet it lets you set configure it as an I2C device.  All of the chip's I/O lines are broken out, you just have to wire them up as you want them.  The possibilities are limitless!  
+Based on the cheap-as-chips CH32V003, this board has almost nothing on it, yet it lets you configure it as an I2C device.  All of the chip's I/O lines are broken out, you just have to wire them up as you want them.  The possibilities are limitless!  
 
 There is an LED attached to Pin PD0 for your pre-wired blinking pleasure.  Demo code shows you how to turn it into an I2C blinkie.
 
