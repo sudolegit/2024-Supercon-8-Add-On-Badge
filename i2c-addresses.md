@@ -2,6 +2,8 @@
 
 The below list is a work in progress for documenting the different I2C addresses used on SAOs that will be around at Supercon 8, either the official ones, or SAOs made by other people.
 
+For a good list of commercial chips' addresses, see [Adafruit's List of I2C Addresses](https://learn.adafruit.com/i2c-addresses/the-list).
+
 If you have made an SAO that you are bringing, please add it to this list submitting a pull request.
 
 | Address    | SAO                       | Notes                           | Link to SAO info                   |
