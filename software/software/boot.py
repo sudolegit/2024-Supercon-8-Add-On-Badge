@@ -7,6 +7,8 @@ PETAL_ADDRESS      = 0x00
 TOUCHWHEEL_ADDRESS = 0x54
 
 # Testing options
+bootLED = Pin("LED", Pin.OUT)
+bootLED.on()
 
 ## buttons
 buttonA = Pin(8, Pin.IN, Pin.PULL_UP)
