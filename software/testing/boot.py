@@ -2,12 +2,9 @@
 
 from machine import I2C, Pin
 import time
-import ssd1306
 
 PETAL_ADDRESS      = 0x00
 TOUCHWHEEL_ADDRESS = 0x54
-SCREEN_ADDRESS     = 0x3C
-## wrap this all up in a badge class eventually
 
 # Testing options
 
@@ -38,10 +35,6 @@ gpio62 = Pin(17, Pin.OUT)
 GPIOs = [ [gpio11, gpio12], [gpio21, gpio22], [gpio31, gpio32], [gpio41, gpio42],  [gpio51, gpio52], [gpio61, gpio62] ]
 
 
-# debug pin!
-# p = Pin(7, Pin.OUT)
-# p.value(1)
-
 ## GPIOs
 
 ## Initialize I2C peripherals
@@ -70,14 +63,6 @@ def which_bus_has_device_id(i2c_id, debug=False):
 
     return(busses)
 
-## Look for an SSD1306 screen on the bus
-HAS_SCREEN = False
-busses = which_bus_has_device_id(SCREEN_ADDRESS)
-if len(busses) == 1:
-    screen = ssd1306.SSD1306_I2C(128, 64, busses[0])
-    HAS_SCREEN = True
-else: 
-    print(f"Warning: {len(busses)} busses found that match SSD1306 address.")
 
 def petal_init(bus):
     """configure the petal SAO"""

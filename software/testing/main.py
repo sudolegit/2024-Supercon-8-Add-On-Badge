@@ -15,24 +15,6 @@ if petal_bus:
 
 while True:
 
-    if HAS_SCREEN:
-        screen.fill(0)
-
-        screen.text("Hello Hackaday!", 10, 0)
-
-        screen.text("Button A: ", 25, 20)
-        screen.text(str(buttonA.value()), 100, 20)
-        screen.text("Button B: ", 25, 30)
-        screen.text(str(buttonB.value()), 100, 30)
-        screen.text("Button C: ", 25, 40)
-        screen.text(str(buttonC.value()), 100, 40)
-
-        if touchwheel_bus:
-            screen.text("Wheel: ", 25, 50)
-            screen.text(str(touchwheel_read(touchwheel_bus)), 80, 50)
-
-        screen.show()
-    
     ## display button status on RGB
     if petal_bus:
         if not buttonA.value():
@@ -57,6 +39,7 @@ while True:
     ## display touchwheel on petal
     if petal_bus and touchwheel_bus:
         if tw > 0:
+            tw = (128 - tw) % 256 
             petal = int(tw/32) + 1
         else: 
             petal = 999
@@ -66,17 +49,6 @@ while True:
             else:
                 petal_bus.writeto_mem(0, i, bytes([0x00]))
 
-    ## pull GPIOs high to test
-    if counter % 10 == 0:
-        for i in range(6):
-            GPIOs[i][0].value(1)
-            GPIOs[i][1].value(1)
-    else:
-        for i in range(6):
-            GPIOs[i][0].value(0)
-            GPIOs[i][1].value(0)
-
-    counter = counter + 1
 
     
     time.sleep_ms(20)
