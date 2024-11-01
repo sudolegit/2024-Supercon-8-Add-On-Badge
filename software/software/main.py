@@ -52,7 +52,7 @@ while True:
                 petal = petal + 1
         
         # Drive petal using accelerometer (X axis)
-        elif controller.buttons.Z and prev_accel_x_ref_point != 0:
+        elif controller and controller.buttons.Z and prev_accel_x_ref_point != 0:
             check_for_rollover = True
             petal_bus.writeto_mem(PETAL_ADDRESS, 3, bytes([0x80]))
             
