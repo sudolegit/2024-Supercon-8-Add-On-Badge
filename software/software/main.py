@@ -17,8 +17,6 @@ if petal_bus:
 controller = None
 while True:
     controller = wii.configure(i2c0, i2c1)
-    if controller:
-        print(controller.buttons)
     
     ## display button status on RGB
     if petal_bus:
@@ -43,19 +41,50 @@ while True:
 
     ## display touchwheel on petal
     if petal_bus and touchwheel_bus:
+        # Drive petal using touchwheel
         if tw > 0:
-            tw = (128 - tw) % 256 
+            tw = (128 - tw) % 256
             petal = int(tw/32) + 1
-        else: 
-            petal = 999
+        
+        # Drive petal using joystick
+        elif controller and (controller.joystick.x not in range(wii.JOYSTICK_MIDPOINT_X - 15, wii.JOYSTICK_MIDPOINT_X + 15) or controller.joystick.y not in range(wii.JOYSTICK_MIDPOINT_Y - 15, wii.JOYSTICK_MIDPOINT_Y + 15)):
+            # Check for rotation
+            # - Static (no change)
+            if controller.joystick.x in range(prev_joystick_x - 15, prev_joystick_x + 15) and controller.joystick.y in range(prev_joystick_y - 15, prev_joystick_y + 15):
+                pass
+            # Counter clockwise
+            elif ((controller.joystick.x > prev_joystick_x) and (controller.joystick.y > wii.JOYSTICK_MIDPOINT_Y)) or ((controller.joystick.x < prev_joystick_x) and (controller.joystick.y < wii.JOYSTICK_MIDPOINT_Y)):
+                petal = petal - 1
+            # Clockwise
+            else:
+                petal = petal + 1
+            
+            # Handle rollover
+            if petal > 8:
+                petal = 1
+            elif petal < 1:
+                petal = 8
+        
+        # Turn off petal
+        else:
+            petal = 0
+        
+        # Push petal values to target PCB
         for i in range(1,9):
             if i == petal:
                 petal_bus.writeto_mem(0, i, bytes([0x7F]))
             else:
                 petal_bus.writeto_mem(0, i, bytes([0x00]))
 
-
+    # Track joystick position
+    if controller:
+        prev_joystick_x = controller.joystick.x
+        prev_joystick_y = controller.joystick.y
+    else:
+        prev_joystick_x = wii.JOYSTICK_MIDPOINT_X
+        prev_joystick_y = wii.JOYSTICK_MIDPOINT_Y
     
     time.sleep_ms(20)
     bootLED.off()
+
 

@@ -2,6 +2,10 @@ import nunchuk
 
 WII_NUNCHUCK_ADDRESS 	= 0x52
 
+JOYSTICK_MIDPOINT_X		= 135
+JOYSTICK_MIDPOINT_Y		= 125
+
+
 wii_controller			= None
 
 def configure(i2c0, i2c1):
@@ -33,4 +37,5 @@ def configure(i2c0, i2c1):
     
     # Return handle if connected; else 'None'
     return wii_controller
+
 
