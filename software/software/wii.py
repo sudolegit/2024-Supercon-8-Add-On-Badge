@@ -1,31 +1,36 @@
 import nunchuk
 
-WII_NUNCHUCK_ADDRESS = 0x52
+WII_NUNCHUCK_ADDRESS 	= 0x52
+
+wii_controller			= None
 
 def configure(i2c0, i2c1):
     global wii_controller
     
     # Locate Wii Nunchuck
-    wii_bus			= None
-    wii_controller	= None
+    wii_bus = None
     try:
         i2c0.readfrom_mem(WII_NUNCHUCK_ADDRESS, 0, 1)
         wii_bus = i2c0
-        print("Wii Nunchuck using I2C0")
     except:
         try:
             i2c1.readfrom_mem(WII_NUNCHUCK_ADDRESS, 0, 1)
             wii_bus = i2c1
-            print("Wii Nunchuck using I2C1")
         except:
-            print("Warning:  Wii Nunchuck not found")
+            pass
     
-    # Unlock Wii Nunchuck
+    # Connect to Wii Nunchuck
     try:
-        wii_controller = nunchuk.Nunchuk(wii_bus)
-        print("Wii Nunchuk connected")
+        if wii_bus != None and wii_controller == None:
+            wii_controller = nunchuk.Nunchuk(wii_bus)
+            print("Wii Nunchuk connected")
+        elif wii_bus == None:
+            raise
     except:
-        print("Warning:  Failed to connect to Wii Nunchuk")
+        if wii_controller:
+            print("Wii Nunchuk disconnected")
+        wii_controller = None
     
+    # Return handle if connected; else 'None'
     return wii_controller
 

@@ -2,8 +2,6 @@ from machine import I2C, Pin
 import time
 import wii
 
-controller = wii.configure(i2c0, i2c1)
-
 counter = 0
 
 ## do a quick spiral to test
@@ -16,7 +14,11 @@ if petal_bus:
             time.sleep_ms(30)
             petal_bus.writeto_mem(PETAL_ADDRESS, i, bytes([which_leds]))
 
+controller = None
 while True:
+    controller = wii.configure(i2c0, i2c1)
+    if controller:
+        print(controller.buttons)
     
     ## display button status on RGB
     if petal_bus:

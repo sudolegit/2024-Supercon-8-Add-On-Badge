@@ -112,8 +112,11 @@ class Nunchuk:
         return self._read_register(0x00)
 
     def _read_register(self, register) -> bytearray:
-        self._i2c.writeto(self.address, bytes([register]))
-        time.sleep_us(self._i2c_read_delay_us)
-        self._i2c.readfrom_into(self.address, self.buffer)
-        return self.buffer
+        try:
+            self._i2c.writeto(self.address, bytes([register]))
+            time.sleep_us(self._i2c_read_delay_us)
+            self._i2c.readfrom_into(self.address, self.buffer)
+            return self.buffer
+        except:
+            pass
 
