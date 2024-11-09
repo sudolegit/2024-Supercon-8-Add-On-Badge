@@ -1,8 +1,20 @@
 from machine import I2C, Pin
 import time
 import wii
+import macintosh
 
-counter = 0
+
+## Global constants
+MAIN_LOOP_ITERATION_DELAY_MS	= 20										# Amount of time (in milliseconds) to delay between iterations of the main loop
+CONTROL_MODES					= ('petal', 'macintosh')					# Tuple of all potential modes
+MIN_MODE_SWITCH_HOLD_COUNT		= round(750 / MAIN_LOOP_ITERATION_DELAY_MS)	# Number of main loop iterations to detecta mode switch request before accepting it (~3/4 second)
+
+## Global variables
+controller 						= None										# Instance of Wii Nunchuk controller for querying nunchuk state
+prev_accel_x_ref_point 			= 0											# Tracking variable - Wii Nunchuk - Acceleration X reference point
+control_mode					= -1										# Tracks which CONTROL_MODES entry is active (what the Wii Nunchuk controls). Defautls to -1 so that when auto detection on the first loop iteration occurs it selects the first entry (zero-indexed tuple).
+mode_switch						= (MIN_MODE_SWITCH_HOLD_COUNT - 1)			# Tracks how long the mode switch has been held. Defaults to max to trigger auto-detection of default mode on the first loop iteration.
+mode_switch_delay				= 0											# Tracks if there should be a delay before you can switch modes back (min time in a mode state).
 
 ## do a quick spiral to test
 if petal_bus:
@@ -14,12 +26,28 @@ if petal_bus:
             time.sleep_ms(30)
             petal_bus.writeto_mem(PETAL_ADDRESS, i, bytes([which_leds]))
 
-controller 				= None
-prev_accel_x_ref_point 	= 0
-rotation 				= 0
+## Main loop
 while True:
-    controller = wii.configure(i2c0, i2c1)
-
+    ## Maintain I2C connections
+    controller			= wii.configure(i2c0, i2c1)
+    macintosh_connected	= macintosh.connect(i2c0, i2c1)
+    
+    ## Handle mode selection
+    mode_switch = (mode_switch + 1) if (controller.buttons.C and controller.buttons.Z or control_mode == -1) else 0
+    
+    if mode_switch == MIN_MODE_SWITCH_HOLD_COUNT:
+        control_mode = (control_mode + 1) % len(CONTROL_MODES)
+        if control_mode == 0:
+            petal_bus.writeto_mem(PETAL_ADDRESS, 2, bytes([0x80]))
+            petal_bus.writeto_mem(PETAL_ADDRESS, 3, bytes([0x80]))
+            petal_bus.writeto_mem(PETAL_ADDRESS, 4, bytes([0x80]))
+            time.sleep_ms(100)
+            petal_bus.writeto_mem(PETAL_ADDRESS, 2, bytes([0x00]))
+            petal_bus.writeto_mem(PETAL_ADDRESS, 3, bytes([0x00]))
+            petal_bus.writeto_mem(PETAL_ADDRESS, 4, bytes([0x00]))
+        
+        print(f"New control mode:  {CONTROL_MODES[control_mode]}")
+        
     ## see what's going on with the touch wheel
     if touchwheel_bus:
         tw = touchwheel_read(touchwheel_bus)
@@ -36,7 +64,12 @@ while True:
             petal_bus.writeto_mem(PETAL_ADDRESS, 4, bytes([0x80]))
         
         # Drive petal using joystick
-        elif controller and (controller.joystick.x not in range(wii.JOYSTICK_MIDPOINT_X - 15, wii.JOYSTICK_MIDPOINT_X + 15) or controller.joystick.y not in range(wii.JOYSTICK_MIDPOINT_Y - 15, wii.JOYSTICK_MIDPOINT_Y + 15)):
+        elif (	controller and 
+                (CONTROL_MODES[control_mode] == 'petal' and not controller.buttons.C) and 
+                (	controller.joystick.x not in range(wii.JOYSTICK_MIDPOINT_X - 15, wii.JOYSTICK_MIDPOINT_X + 15) or
+                    controller.joystick.y not in range(wii.JOYSTICK_MIDPOINT_Y - 15, wii.JOYSTICK_MIDPOINT_Y + 15)
+                )
+            ):
             check_for_rollover = True
             petal_bus.writeto_mem(PETAL_ADDRESS, 2, bytes([0x80]))
             
@@ -52,7 +85,10 @@ while True:
                 petal = petal + 1
         
         # Drive petal using accelerometer (X axis)
-        elif controller and controller.buttons.Z and prev_accel_x_ref_point != 0:
+        elif (	controller and
+                (CONTROL_MODES[control_mode] == 'petal' and not controller.buttons.C) and 
+                controller.buttons.Z and prev_accel_x_ref_point != 0
+            ):
             check_for_rollover = True
             petal_bus.writeto_mem(PETAL_ADDRESS, 3, bytes([0x80]))
             
@@ -71,7 +107,6 @@ while True:
         # Turn off petal and reset tracking vars
         else:
             # Reset accelerometer tracking
-            rotation				= 0
             prev_accel_x_ref_point 	= 0
             
             # Clear LED state on petal
@@ -107,7 +142,7 @@ while True:
         prev_joystick_y = wii.JOYSTICK_MIDPOINT_Y
         prev_accel_x_ref_point	= 0
     
-    time.sleep_ms(20)
+    time.sleep_ms(MAIN_LOOP_ITERATION_DELAY_MS)
     bootLED.off()
 
 
